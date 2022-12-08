@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+// #!/usr/bin/env node Indica que el archivo es un script ejecutable de Node.js al batch
+/** Dependencias del módulo. */
+var app = require('../app');//Importar la aplicación de app.js
+var debug = require('debug')('parqueaderoapi:server');//Importar el módulo debug
+var http = require('http');//Importar el módulo http
+/** Fin Dependencias del módulo. */
+var port = normalizePort(process.env.PORT || '3000');/** Puerto desde el shell servidor o 3000*/
+app.set('port', port);//Establecer puerto de la aplicación
+var server = http.createServer(app);//Crear servidor HTTP
+server.listen(port);//Escuche en el puerto provisto, en todas las interfaces de red.
+server.on('error', onError);//server.on('error', onError); sirve para escuchar eventos de error
+server.on('listening', onListening);//Escuchar eventos de escucha
+/**
+ * Normalize a port into a number, string, or false.
+ * 
+ * @param val Valor del puerto
+ * @returns 
+ */
+function normalizePort(val) {/** Normaliza un puerto en un número, cadena o falso. */
+  var port = parseInt(val, 10);//Convertir a número
+  if (isNaN(port)) return val;//Tubería con nombre
+  if (port >= 0) return port;//Número de puerto
+  return false;//No es un puerto
+}
+/**
+ * Event listener for the "error" event from the HTTP server.
+ * @param error Receives the error text 'EACCES' 'EADDRINUSE'
+ */
+function onError(error) {/** Escucha de eventos para el evento de "error" del servidor HTTP. */
+  if (error.syscall !== 'listen') throw error;// manejar errores inesperados
+  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;// verifique si es una tubería con nombre o un número de puerto
+  switch (error.code) {//Manejar errores de escucha específicos con mensajes amigables
+    case 'EACCES'://El puerto requerido es un número de puerto y el usuario no tiene permisos de superusuario (root).
+      console.error(bind + ' requiere privilegios elevados'); 
+      process.exit(1);//Salir del proceso
+      break;//Finaliza el caso del interruptor o switch 
+    case 'EADDRINUSE': //El puerto requerido es un número de puerto y está actualmente en uso.
+      console.error(bind + ' Esta en uso');
+      process.exit(1);//Salir del proceso
+      break;//Salir del proceso
+    default://Finaliza el caso del interruptor o switch 
+      throw error;//Manejar errores inesperados
+  }
+}
+/** Event listener for the "listening" event from the HTTP server. */
+function onListening() {/** Escucha de eventos para el evento de "escucha" del servidor HTTP. */
+  var addr = server.address(); // Obtener dirección del servidor
+  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port; // Verificar tipo de dirección sea dirección de tubería o dirección de puerto
+  debug('Escuchando en ' + bind); // debug('Listening on ' + bind); sirve para mostrar en consola el puerto en el que se ejecuta el servidor
+}
